@@ -22,6 +22,7 @@ public class CatalogBrowseController {
     	String methodName="process";
     	
     	LOGGER.entering(CLASSNAME, methodName);
+    	//System.out.println("New class");
     	System.out.println("Request body is:"+payload);
         
        // return null;

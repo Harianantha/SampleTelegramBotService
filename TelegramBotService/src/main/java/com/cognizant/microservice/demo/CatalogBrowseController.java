@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/browse")
+@RequestMapping("/chattest")
 public class CatalogBrowseController {
 
 	private final static Logger LOGGER = Logger.getLogger(CatalogBrowseController.class.getName()); 

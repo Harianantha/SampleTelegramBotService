@@ -28,6 +28,29 @@
             <version>2.2.2</version>
             <scope>compile</scope>
         </dependency> 
+        <dependency>
+    		<groupId>org.glassfish</groupId>
+    		<artifactId>javax.json</artifactId>
+    		<version>1.0.4</version>
+		</dependency>
+		<dependency>
+    		<groupId>javax.json</groupId>
+   			 <artifactId>javax.json-api</artifactId>
+  			  <version>1.0</version>
+		</dependency>
+		 <dependency>
+			<groupId>org.meetup</groupId>
+			<artifactId>Memacachejavaclient</artifactId>
+			 <version>1.0.0</version>
+			 <!-- <scope>runtime</scope> -->
+			 <classifier></classifier>
+		</dependency> 
+		<dependency>
+			  <groupId>spy</groupId>
+	 		 <artifactId>spymemcached</artifactId>
+	  		<version>2.10.3</version>
+	  		<scope>provided</scope>
+		</dependency>
     </dependencies>
 
     <properties>
@@ -47,12 +70,38 @@
 
      <repositories>
         <repository>
+  		  <id>lib</id>
+  		  <name>lib</name>
+  		  <releases>
+    		    <enabled>true</enabled>
+      		  <checksumPolicy>ignore</checksumPolicy>
+    		</releases>
+  		  <snapshots>
+      		  <enabled>false</enabled>
+    	</snapshots>
+  		  <url>file://${project.basedir}/lib</url>
+		</repository>
+     <!--    <repository>
             <id>spring-releases</id>
             <url>https://repo.spring.io/libs-release</url>
-        </repository>
+        </repository>  -->
+       
     </repositories> 
     <pluginRepositories>
-        <pluginRepository>
+    
+    	 <pluginRepository>
+  		  <id>lib</id>
+  		  <name>lib</name>
+  		  <releases>
+    		    <enabled>true</enabled>
+      		  <checksumPolicy>ignore</checksumPolicy>
+    		</releases>
+  		  <snapshots>
+      		  <enabled>false</enabled>
+    	</snapshots>
+  		  <url>file://${project.basedir}/lib</url>
+		</pluginRepository>
+      <!--   <pluginRepository>
             <id>spring-releases</id>
             <url>https://repo.spring.io/libs-release</url>
         </pluginRepository> 
@@ -67,7 +116,7 @@
 	      <releases>
 	        <updatePolicy>never</updatePolicy>
 	      </releases>
-   	 </pluginRepository>
+   	 </pluginRepository> -->
     </pluginRepositories>
     <artifactId>TelegramBotService</artifactId>
 </project>

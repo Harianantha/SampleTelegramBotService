@@ -27,4 +27,5 @@ public class MessagingConstants {
 	
 	public final static String MASTER_ITEM_LIST="MASTER_ITEM_LIST";
 	public final static String MASTER_ITEM_MAP = "MASTER_ITEM_MAP";
+	public final static String CACHE_TIMEOUT_KEY = "CACHE_TIMEOUT_KEY";
 }

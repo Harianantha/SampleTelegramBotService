@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.json.Json;
@@ -40,21 +41,19 @@ public class TelegramChatController {
     public void process(@RequestBody String payload) {
     	String methodName="process";
     	LOGGER.entering(CLASSNAME, methodName);
-    	System.out.println("Request body is:"+payload);
+    	LOGGER.log(Level.FINE,"Request body is:"+payload);
     	JsonReader reader=Json.createReader(new StringBufferInputStream(payload));
-    	//JsonStructure structure=reader.read();
+    
     	JsonObject structure=reader.readObject();
-    	//JsonString stringValue=(JsonString)structure.get("text");
-
- 
+     
     	int chatId=0;
     	int messageId=0;
     	String messagePostedByCustomer=null;
     	
     	
-    		//System.out.println("result object:"+result.toString());
+    		
     	if(structure!=null && structure.containsKey("callback_query")){
-    		System.out.println("Request is a callBack Request");
+    		LOGGER.log(Level.FINE,"Request is a callBack Request");
     		//MemcachedClient client = ChatUtil.getMemCacheClient();
     		IMemcacheWrapper client=ChatUtil.getMemCacheClient();
     	    		
@@ -68,7 +67,7 @@ public class TelegramChatController {
     		//User clickd chosen all. Give option to get confirmation
     		if(MessagingConstants.FINAL_OPTION.equalsIgnoreCase(callBackData)){
     			String confirmationMessage=getMoreOptionConfirmation( chatId, messageId);
-    			System.out.println("Message to be sent:"+confirmationMessage);
+    			LOGGER.log(Level.FINE,"Message to be sent:"+confirmationMessage);
     			ChatUtil.sendReplyMessage(confirmationMessage);
     			
     			
@@ -86,7 +85,7 @@ public class TelegramChatController {
     			String sessionObjectKey=chatId+"_"+messageId;
     			CustomerChatSession createOrUpdateChatSession=createOrUpdateChatSession(chatId, messageId, memcachedClient, 0, sessionObjectKey);
     			String orderKey=chatId+"_"+messageId+"_"+createOrUpdateChatSession.getSessionKey();
-    			System.out.println("ORDER KEY TO RETRIEVE:"+orderKey);
+    			LOGGER.log(Level.FINE,"ORDER KEY TO RETRIEVE:"+orderKey);
     			Order clientOrder=(Order)memcachedClient.get(orderKey);
     			Map<String, Integer> orderItemQuantityMap=clientOrder.getItemQuantityMap();
     			//If the control comes here by user clicking on quantitys for an item, update the quuantities and show message to
@@ -94,7 +93,7 @@ public class TelegramChatController {
     			if(callBackData.contains(":qty")){
     				
     				String itemName=values[1];
-    				System.out.println("ITEM NAME FOR WHICH QUANTITY ENTERED:"+itemName);
+    				LOGGER.log(Level.FINE,"ITEM NAME FOR WHICH QUANTITY ENTERED:"+itemName);
     				orderItemQuantityMap.put(itemName, Integer.valueOf(values[3]));
     				clientOrder.setItemQuantityMap(orderItemQuantityMap);
     				memcachedClient.replace(orderKey, clientOrder);
@@ -110,7 +109,7 @@ public class TelegramChatController {
     				if(orderItemQuantityMap.get(key).intValue()==0){
     					proceedToCheckout=false;
     					String replyMessage=getQuantitiesForItem(chatId, messageId,key);
-    					System.out.println("REPLY MESSAGE FOR ENTERING QUANTITIES:"+replyMessage);
+    					LOGGER.log(Level.FINE,"REPLY MESSAGE FOR ENTERING QUANTITIES:"+replyMessage);
     					ChatUtil.sendReplyMessage(replyMessage);
     					break;
     				}
@@ -129,18 +128,18 @@ public class TelegramChatController {
         			int itemQuantity=0;
         			String itemName=null;
         			Map<String,FoodItem> masterItemMap=(Map<String,FoodItem>)memcachedClient.get(MessagingConstants.MASTER_ITEM_MAP);
-        			JsonObjectBuilder keyBoardBuilder=Json.createObjectBuilder();
+        			/*JsonObjectBuilder keyBoardBuilder=Json.createObjectBuilder();
         			JsonArrayBuilder keyBoardArrayBuilderOuter=Json.createArrayBuilder();
         			JsonArrayBuilder headerarrayBuilder=Json.createArrayBuilder();
-        			JsonObjectBuilder headerObject=Json.createObjectBuilder();
+        			JsonObjectBuilder headerObject=Json.createObjectBuilder();*/
         			StringBuilder reply=new StringBuilder( "ITEMNAME--QUANTITY--ITEMVALUE");
         			//reply.append("\n");
-        			headerObject.add(MessagingConstants.TEXT, "ITEMNAME			QUANTITY			ITEMVALUE");
+        			/*headerObject.add(MessagingConstants.TEXT, "ITEMNAME			QUANTITY			ITEMVALUE");
         			headerarrayBuilder.add(headerObject);
-        			keyBoardArrayBuilderOuter.add(headerarrayBuilder);
+        			keyBoardArrayBuilderOuter.add(headerarrayBuilder);*/
         			
-        			JsonArrayBuilder itemRowArraybuilder=null;
-        			JsonObjectBuilder itemObjectBuilder=null;
+        			/*JsonArrayBuilder itemRowArraybuilder=null;
+        			JsonObjectBuilder itemObjectBuilder=null;*/
         			while(keysIteartor2.hasNext()){
         				keyInMap=keysIteartor2.next();
         				itemName=masterItemMap.get(keyInMap).getItemDisplayName();
@@ -148,28 +147,28 @@ public class TelegramChatController {
         				itemMasterValue=masterItemMap.get(keyInMap).getPrice();
         				itemValue=itemQuantity*itemMasterValue;
         				itemName=masterItemMap.get(keyInMap).getItemDisplayName();
-        				itemObjectBuilder=Json.createObjectBuilder();
+        				/*itemObjectBuilder=Json.createObjectBuilder();
         				
         				itemObjectBuilder.add(MessagingConstants.TEXT, itemName+"			"+itemQuantity+"			"+itemValue);
         				itemRowArraybuilder=Json.createArrayBuilder();
         				itemRowArraybuilder.add(itemObjectBuilder);
-        				keyBoardArrayBuilderOuter.add(itemRowArraybuilder);
+        				keyBoardArrayBuilderOuter.add(itemRowArraybuilder);*/
         				reply.append(itemName+"--"+itemQuantity+"--"+itemValue);
         				totalValue=totalValue+itemValue;
         				//reply.append("\n");
         			}
         			
-        			JsonArrayBuilder totalValueArray=Json.createArrayBuilder();
+        		/*	JsonArrayBuilder totalValueArray=Json.createArrayBuilder();
         			JsonObjectBuilder totalValueObject=Json.createObjectBuilder();
-        			totalValueObject.add(MessagingConstants.TEXT, "TOTAL VALUE			"+totalValue);
+        			totalValueObject.add(MessagingConstants.TEXT, "TOTAL VALUE			"+totalValue);*/
         			reply.append( "TOTAL VALUE--"+totalValue);
-        			totalValueArray.add(totalValueObject);
+        			/*totalValueArray.add(totalValueObject);
         			keyBoardArrayBuilderOuter.add(totalValueArray);
-        			keyBoardBuilder.add("inline_keyboard", keyBoardArrayBuilderOuter);
+        			keyBoardBuilder.add(MessagingConstants.INLINE_KEYBOARD, keyBoardArrayBuilderOuter);*/
         			
         			//TODO ADD LINK TO MAKE PAYMENT
         			String replyText=getCartOverViewMessage(chatId,messageId,reply.toString());
-        			System.out.println("Cart Page to be shown:"+replyText);
+        			LOGGER.log(Level.FINE,"Cart Page to be shown:"+replyText);
         			ChatUtil.sendReplyMessage(replyText);
     			}
     			
@@ -191,7 +190,7 @@ public class TelegramChatController {
     		return;
     	}
     		if(structure!=null){
-    			//System.out.println("parentMessageObject object:"+parentMessageObject.toString());
+    			//LOGGER.log(Level.FINE,"parentMessageObject object:"+parentMessageObject.toString());
     			
     			JsonObject messageObject=structure.getJsonObject("message");
     			if(messageObject!=null){
@@ -202,17 +201,17 @@ public class TelegramChatController {
         			messageId=messageObject.getInt("message_id");
     					
     			}else{
-    				System.out.println("messageObject is null");
+    				LOGGER.log(Level.FINE,"messageObject is null");
     			}
     			
             		
     		}else{
-    			System.out.println("parentMessageObject is null");
+    			LOGGER.log(Level.FINE,"parentMessageObject is null");
     		}
         		
     	
     	String replyMessage=getConstructedReplyURL(messagePostedByCustomer,chatId,messageId);
-    	System.out.println("Reply URL to be posted:"+replyMessage);
+    	LOGGER.log(Level.FINE,"Reply URL to be posted:"+replyMessage);
     	
     	
     	ChatUtil.sendReplyMessage(replyMessage);
@@ -225,10 +224,10 @@ public class TelegramChatController {
 	private void populateItemSelectionCallBack(int chatId, int messageId, IMemcacheWrapper client, int timestamp,
 			String callBackData) {
 		String sessionObjectKey=chatId+"_"+messageId;
-		System.out.println("Before calling createOrUpdateChatSession");
+		LOGGER.log(Level.FINE,"Before calling createOrUpdateChatSession");
 		CustomerChatSession chatSession = createOrUpdateChatSession(chatId, messageId, client, timestamp,
 				sessionObjectKey);
-		System.out.println("Before calling createOrUpdateSessionOrder");
+		LOGGER.log(Level.FINE,"Before calling createOrUpdateSessionOrder");
 		createOrUpdateSessionOrder(chatId, messageId, client, callBackData, chatSession);
 	}
 
@@ -236,21 +235,21 @@ public class TelegramChatController {
 			CustomerChatSession chatSession) {
 		String orderKey=chatId+"_"+messageId+"_"+chatSession.getSessionKey();
 		Order clientOrder=null;
-		System.out.println("Order key:"+orderKey);
+		LOGGER.log(Level.FINE,"Order key:"+orderKey);
 		if(!client.keyExists(orderKey)){
-			System.out.println("Client order does not exist in Memacache.Creating new");
+			LOGGER.log(Level.FINE,"Client order does not exist in Memacache.Creating new");
 		 clientOrder=new Order();
 		 //client.set(orderKey, clientOrder);
 		 client.add(orderKey, clientOrder);
 		}else{
-			System.out.println("Client order exist in Memacache.");
+			LOGGER.log(Level.FINE,"Client order exist in Memacache.");
 			clientOrder=(Order)client.get(orderKey);
 		}
 		if(callBackData.equalsIgnoreCase("Done with Selection.Enter QUantities")){
-			System.out.println("Done with selection");
+			LOGGER.log(Level.FINE,"Done with selection");
 		}else{
 			
-			System.out.println("Still more to select");
+			LOGGER.log(Level.FINE,"Still more to select");
 			clientOrder.addItemQuantityMap(callBackData, new Integer(0));
 			//client.set(orderKey, clientOrder);
 			client.replace(orderKey, clientOrder);
@@ -263,15 +262,15 @@ public class TelegramChatController {
 		CustomerChatSession chatSession=null;
 		if(!client.keyExists(sessionObjectKey)){
 			 chatSession=new CustomerChatSession(Long.valueOf(chatId),Long.valueOf(messageId),Long.valueOf(timestamp),null);
-		//	 chatSession.setSessionKey(Long.valueOf(timestamp));
+		
 			//client.set(sessionObjectKey, chatSession);
 			 chatSession.addSessionMetrics(ORDER_STATUS, PENDING);
 			client.add(sessionObjectKey, chatSession);
 			
-			System.out.println("Client Session Doesnot exist.Creating new");
+			LOGGER.log(Level.FINE,"Client Session Doesnot exist.Creating new");
 			
 		}else{
-			System.out.println("Client Session  exist");
+			LOGGER.log(Level.FINE,"Client Session  exist");
 			chatSession=(CustomerChatSession)client.get(sessionObjectKey);
 		}
 		return chatSession;
@@ -308,31 +307,7 @@ public class TelegramChatController {
     	
     	
     	JsonArrayBuilder keyBoardArrayBuilderLastLine=Json.createArrayBuilder();
-    	/*JsonArrayBuilder keyBoardArrayBuilderLine1=Json.createArrayBuilder();
-    	JsonArrayBuilder keyBoardArrayBuilderLine2=Json.createArrayBuilder();
-    	JsonArrayBuilder keyBoardArrayBuilderLine3=Json.createArrayBuilder();
-    	JsonArrayBuilder keyBoardArrayBuilderLine4=Json.createArrayBuilder();
     	
-    	JsonObjectBuilder samosaObjectBuilder=Json.createObjectBuilder();
-    	samosaObjectBuilder.add(MessagingConstants.TEXT, "Samosa@Rs75");
-    //	samosaObjectBuilder.add("url", "https://telegrambotservice.cfapps.io/chat/processcallback");
-    	samosaObjectBuilder.add(MessagingConstants.CALLBACK_DATA, "Samosa");
-    	
-    	
-    	JsonObjectBuilder sandwichObjectBuilder=Json.createObjectBuilder();
-    	sandwichObjectBuilder.add(MessagingConstants.TEXT, "Veg Sandwich@Rs100");
-   // 	sandwichObjectBuilder.add("url", "https://telegrambotservice.cfapps.io/chat/processcallback");
-    	sandwichObjectBuilder.add(MessagingConstants.CALLBACK_DATA, "Sandwich");
-    	
-    	JsonObjectBuilder combo1ObjectBuilder=Json.createObjectBuilder();
-    	combo1ObjectBuilder.add(MessagingConstants.TEXT, "Coke+Small Popcron@Rs150");
-  //  	combo1ObjectBuilder.add("url", "https://telegrambotservice.cfapps.io/chat/processcallback");
-    	combo1ObjectBuilder.add(MessagingConstants.CALLBACK_DATA, "Combo1");
-    	
-    	JsonObjectBuilder combo2ObjectBuilder=Json.createObjectBuilder();
-    	combo2ObjectBuilder.add(MessagingConstants.TEXT, "Coke+Large Popcron@Rs200");
-  //  	combo2ObjectBuilder.add("url", "https://telegrambotservice.cfapps.io/chat/processcallback");
-    	combo2ObjectBuilder.add(MessagingConstants.CALLBACK_DATA, "Combo2");*/
     	
     	JsonObjectBuilder confirmEndOfSelection=Json.createObjectBuilder();
     	confirmEndOfSelection.add(MessagingConstants.TEXT, "Done with Selection.Enter QUantities");
@@ -340,17 +315,9 @@ public class TelegramChatController {
     	confirmEndOfSelection.add(MessagingConstants.CALLBACK_DATA, MessagingConstants.FINAL_OPTION);
     	keyBoardArrayBuilderLastLine.add(confirmEndOfSelection);
     	
-    	/*keyBoardArrayBuilderLine1.add(samosaObjectBuilder);
-    	keyBoardArrayBuilderLine2.add(sandwichObjectBuilder);
-    	keyBoardArrayBuilderLine3.add(combo1ObjectBuilder);
-    	keyBoardArrayBuilderLine4.add(combo2ObjectBuilder);
-    	keyBoardArrayBuilderLastLine.add(confirmEndOfSelection);
-    	keyBoardArrayBuilderOuter.add(keyBoardArrayBuilderLine1);
-    	keyBoardArrayBuilderOuter.add(keyBoardArrayBuilderLine2);
-    	keyBoardArrayBuilderOuter.add(keyBoardArrayBuilderLine3);
-    	keyBoardArrayBuilderOuter.add(keyBoardArrayBuilderLine4);*/
+    	
     	keyBoardArrayBuilderOuter.add(keyBoardArrayBuilderLastLine);
-    	keyBoardBuilder.add("inline_keyboard", keyBoardArrayBuilderOuter);
+    	keyBoardBuilder.add(MessagingConstants.INLINE_KEYBOARD, keyBoardArrayBuilderOuter);
     	String options=keyBoardBuilder.build().toString();
     	
     	
@@ -360,7 +327,7 @@ public class TelegramChatController {
     	reply.append(MessagingConstants.EQUALS);
     	reply.append(messageId);
     	String replyUrl=reply.toString();
-    	//System.out.println("replyUrl:"+replyUrl);
+    	//LOGGER.log(Level.FINE,"replyUrl:"+replyUrl);
     	return replyUrl;
     }
     
@@ -398,7 +365,7 @@ public class TelegramChatController {
     	keyBoardArrayBuilderOuter.add(keyBoardArrayBuilderLine1);
     	keyBoardArrayBuilderOuter.add(keyBoardArrayBuilderLine2);
 
-    	keyBoardBuilder.add("inline_keyboard", keyBoardArrayBuilderOuter);
+    	keyBoardBuilder.add(MessagingConstants.INLINE_KEYBOARD, keyBoardArrayBuilderOuter);
     	String options=keyBoardBuilder.build().toString();
     	
     	
@@ -408,7 +375,7 @@ public class TelegramChatController {
     	reply.append(EQUALS);
     	reply.append(messageId);*/
     	String replyUrl=reply.toString();
-    	//System.out.println("replyUrl:"+replyUrl);
+    	//LOGGER.log(Level.FINE,"replyUrl:"+replyUrl);
     	return replyUrl;
     }
  
@@ -452,7 +419,7 @@ public class TelegramChatController {
  	}
  	
 
-  	keyBoardBuilder.add("inline_keyboard", keyBoardArrayBuilderOuter);
+  	keyBoardBuilder.add(MessagingConstants.INLINE_KEYBOARD, keyBoardArrayBuilderOuter);
  	String options=keyBoardBuilder.build().toString(); 	
  	
  	reply.append("Press number of quantities for "+item+"&reply_markup="+options);
@@ -480,7 +447,7 @@ public class TelegramChatController {
  	reply.append(EQUALS);
  	reply.append(messageId);*/
  	String replyUrl=reply.toString();
- 	//System.out.println("replyUrl:"+replyUrl);
+ 	//LOGGER.log(Level.FINE,"replyUrl:"+replyUrl);
  	return replyUrl;
  }
  
@@ -511,10 +478,10 @@ public class TelegramChatController {
 	 	innerArrayBuilder.add(payButton);
 	 	outerArrayBuilder.add(innerArrayBuilder);
 	 	JsonObjectBuilder keyBoardBuilder=Json.createObjectBuilder();
-	 	keyBoardBuilder.add("inline_keyboard", outerArrayBuilder);
+	 	keyBoardBuilder.add(MessagingConstants.INLINE_KEYBOARD, outerArrayBuilder);
 	 	reply.append(keyBoardBuilder.build().toString());
 	 	String replyUrl=reply.toString();
-	 	//System.out.println("replyUrl:"+replyUrl);
+	 	//LOGGER.log(Level.FINE,"replyUrl:"+replyUrl);
 	 	return replyUrl;
 	 }
      

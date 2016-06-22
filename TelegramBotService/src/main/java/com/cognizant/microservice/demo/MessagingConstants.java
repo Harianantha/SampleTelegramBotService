@@ -15,6 +15,7 @@ public class MessagingConstants {
 	public final static String MEMCACHE_PORT="MEMCACHE_PORT";
 	public final static String MEMCACHE_USERNAME="MEMCACHE_USERNAME";
 	public final static String MEMCACHE_PASSWORD="MEMCACHE_PASSWORD";
+	public final static String INLINE_KEYBOARD="inline_keyboard";
 	
 	//GET THIS VALUE FROM SYSTEM PROPERTIES
 	public static String REPLY_URL="https://api.telegram.org/bot162646339:AAFLvRJOZNbnYsw_7fiECo-UEXZ-JWoGhNE/sendMessage?";

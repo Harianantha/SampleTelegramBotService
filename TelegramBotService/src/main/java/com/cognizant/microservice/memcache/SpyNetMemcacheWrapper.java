@@ -2,6 +2,9 @@ package com.cognizant.microservice.memcache;
 
 import java.io.IOException;
 
+import com.cognizant.microservice.demo.ChatUtil;
+import com.cognizant.microservice.demo.MessagingConstants;
+
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.ConnectionFactoryBuilder;
 import net.spy.memcached.MemcachedClient;
@@ -12,17 +15,18 @@ import net.spy.memcached.internal.OperationFuture;
 public class SpyNetMemcacheWrapper implements IMemcacheWrapper {
 
 	private MemcachedClient client=null;
+	private int timeout=0;
 	@Override
 	public boolean add(String key, Object value) {
 		// TODO Auto-generated method stub
-		OperationFuture<Boolean> addResult=client.add(key, 0, value);
+		OperationFuture<Boolean> addResult=client.add(key, timeout, value);
 		return addResult.isDone();
 	}
 
 	@Override
 	public boolean set(String key, Object value) {
 		
-		OperationFuture<Boolean> setResult=client.set(key, 0, value);
+		OperationFuture<Boolean> setResult=client.set(key, timeout, value);
 		return setResult.isDone();
 	}
 
@@ -36,7 +40,7 @@ public class SpyNetMemcacheWrapper implements IMemcacheWrapper {
 	@Override
 	public boolean replace(String key, Object value) {
 		// TODO Auto-generated method stub
-		OperationFuture<Boolean> replaceResult=client.replace(key, 0, value);
+		OperationFuture<Boolean> replaceResult=client.replace(key, timeout, value);
 		return replaceResult.isDone();
 	}
 
@@ -60,6 +64,9 @@ public class SpyNetMemcacheWrapper implements IMemcacheWrapper {
                     .setProtocol(ConnectionFactoryBuilder.Protocol.BINARY)
                     .setAuthDescriptor(ad).build(),
                 AddrUtil.getAddresses(serverDetails));
+		String timeoutconfigured=ChatUtil.getSystemValue(MessagingConstants.CACHE_TIMEOUT_KEY);
+		this.timeout=Integer.valueOf(timeoutconfigured);
+		
 		
 	}
 
